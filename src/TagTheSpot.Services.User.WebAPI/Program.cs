@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using TagTheSpot.Services.User.Infrastructure.Persistence;
 using TagTheSpot.Services.User.Infrastructure.Persistence.Options;
+using TagTheSpot.Services.User.WebAPI.Factories;
 
 namespace TagTheSpot.Services.User.WebAPI
 {
@@ -19,6 +20,8 @@ namespace TagTheSpot.Services.User.WebAPI
 
                     options.UseNpgsql(dbSettings.ConnectionString);
                 });
+
+            builder.Services.AddSingleton<ProblemDetailsFactory>();
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
