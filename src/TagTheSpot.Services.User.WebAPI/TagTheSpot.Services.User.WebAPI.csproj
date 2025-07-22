@@ -23,6 +23,7 @@
     <ProjectReference Include="..\TagTheSpot.Services.User.Application\TagTheSpot.Services.User.Application.csproj" />
     <ProjectReference Include="..\TagTheSpot.Services.User.Domain\TagTheSpot.Services.User.Domain.csproj" />
     <ProjectReference Include="..\TagTheSpot.Services.User.Infrastructure\TagTheSpot.Services.User.Infrastructure.csproj" />
+    <ProjectReference Include="..\TagTheSpot.Services.User.SharedKernel\TagTheSpot.Services.User.SharedKernel.csproj" />
   </ItemGroup>
 
 </Project>
