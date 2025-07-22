@@ -1,4 +1,9 @@
 
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using TagTheSpot.Services.User.Infrastructure.Persistence;
+using TagTheSpot.Services.User.Infrastructure.Persistence.Options;
+
 namespace TagTheSpot.Services.User.WebAPI
 {
     public class Program
@@ -7,16 +12,20 @@ namespace TagTheSpot.Services.User.WebAPI
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            builder.Services.AddDbContext<ApplicationDbContext>(
+                (serviceProvider, options) =>
+                {
+                    var dbSettings = serviceProvider.GetRequiredService<IOptions<DbSettings>>().Value;
+
+                    options.UseNpgsql(dbSettings.ConnectionString);
+                });
 
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
