@@ -8,6 +8,7 @@ using TagTheSpot.Services.User.Application.DTO;
 using TagTheSpot.Services.User.Application.Identity;
 using TagTheSpot.Services.User.Application.Options;
 using TagTheSpot.Services.User.SharedKernel.Shared;
+using Microsoft.EntityFrameworkCore;
 
 namespace TagTheSpot.Services.User.Application.Services
 {
@@ -32,37 +33,89 @@ namespace TagTheSpot.Services.User.Application.Services
 
         public async Task<Result<LoginResponse>> LoginAsync(LoginRequest request)
         {
-            var foundUser = await _userManager.FindByEmailAsync(request.Email);
+            var user = await _userManager.FindByEmailAsync(request.Email);
 
-            if (foundUser is null)
+            if (user is null)
             {
                 return Result.Failure<LoginResponse>(UserErrors.InvalidCredentials);
             }
 
-            var loginResult = await _signInManager.CheckPasswordSignInAsync(foundUser, request.Password, false);
+            var loginResult = await _signInManager.CheckPasswordSignInAsync(user, request.Password, false);
 
             if (!loginResult.Succeeded)
             {
                 return Result.Failure<LoginResponse>(UserErrors.InvalidCredentials);
             }
 
-            var accessToken = _tokenService.GenerateAccessToken(foundUser);
+            var accessToken = _tokenService.GenerateAccessToken(user);
             var refreshToken = _tokenService.GenerateRefreshToken();
 
-            var refreshTokenHash = Convert.ToBase64String(
-                SHA256.HashData(Encoding.UTF8.GetBytes(refreshToken)));
+            user.RefreshTokenHash = HashRefreshToken(refreshToken);
 
-            foundUser.RefreshTokenHash = refreshTokenHash;
-
-            foundUser.RefreshTokenExpirationTime = DateTime.UtcNow.AddDays(
+            user.RefreshTokenExpirationTime = DateTime.UtcNow.AddDays(
                 _loginSettings.RefreshTokenExpiryInDays);
 
-            await _userManager.UpdateAsync(foundUser);
+            var updateResult = await _userManager.UpdateAsync(user);
+
+            if (!updateResult.Succeeded)
+            {
+                var errors = string.Join("; ", updateResult.Errors);
+
+                throw new InvalidOperationException(
+                    $"Encountered errors during updating a refresh token for user with email: {user.Email}. Errors: {errors}");
+            }
 
             return Result.Success(
                 new LoginResponse(
                     AccessToken: accessToken,
                     RefreshToken: refreshToken));
+        }
+
+        public async Task<Result<LoginResponse>> RefreshTokenAsync(RefreshTokenRequest request)
+        {
+            var refreshTokenHash = HashRefreshToken(request.RefreshToken);
+
+            var user = await _userManager.Users
+                .FirstOrDefaultAsync(x => x.RefreshTokenHash == refreshTokenHash);
+
+            if (user is null)
+            {
+                return Result.Failure<LoginResponse>(UserErrors.InvalidRefreshToken);
+            }
+
+            if (user.RefreshTokenExpirationTime < DateTime.UtcNow)
+            {
+                return Result.Failure<LoginResponse>(UserErrors.RefreshTokenExpired);
+            }
+
+            var accessToken = _tokenService.GenerateAccessToken(user);
+            var refreshToken = _tokenService.GenerateRefreshToken();
+
+            user.RefreshTokenHash = HashRefreshToken(refreshToken);
+
+            user.RefreshTokenExpirationTime = DateTime.UtcNow.AddDays(
+                _loginSettings.RefreshTokenExpiryInDays);
+
+            var updateResult = await _userManager.UpdateAsync(user);
+
+            if (!updateResult.Succeeded)
+            {
+                var errors = string.Join("; ", updateResult.Errors);
+
+                throw new InvalidOperationException(
+                    $"Encountered errors during updating a refresh token for user with email: {user.Email}. Errors: {errors}");
+            }
+
+            return Result.Success(
+                new LoginResponse(
+                    AccessToken: accessToken,
+                    RefreshToken: refreshToken));
+        }
+
+        private static string HashRefreshToken(string token)
+        {
+            return Convert.ToBase64String(
+                SHA256.HashData(Encoding.UTF8.GetBytes(token)));
         }
 
         public async Task<Result<RegisterResponse>> RegisterAsync(RegisterRequest request)

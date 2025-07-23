@@ -18,5 +18,15 @@ namespace TagTheSpot.Services.User.Application.Identity
             Error.Validation(
                 code: "User.InvalidCredentials",
                 description: "The provided credentials are invalid.");
+
+        public static readonly Error InvalidRefreshToken =
+            Error.Validation(
+                code: "User.InvalidRefreshToken",
+                description: "The provided refresh token is invalid.");
+
+        public static readonly Error RefreshTokenExpired =
+            Error.Validation(
+                code: "User.RefreshTokenExpired",
+                description: "The provided refresh token has expired.");
     }
 }
