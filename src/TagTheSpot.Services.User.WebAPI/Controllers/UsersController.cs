@@ -29,5 +29,14 @@ namespace TagTheSpot.Services.User.WebAPI.Controllers
 
             return result.IsSuccess ? Ok(result.Value) : _problemDetailsFactory.GetProblemDetails(result);
         }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login(
+            [FromBody] LoginRequest request)
+        {
+            var result = await _userService.LoginAsync(request);
+
+            return result.IsSuccess ? Ok(result.Value) : _problemDetailsFactory.GetProblemDetails(result);
+        }
     }
 }
