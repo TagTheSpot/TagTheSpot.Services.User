@@ -12,6 +12,9 @@ using TagTheSpot.Services.User.Infrastructure.Services;
 using TagTheSpot.Services.User.WebAPI.Factories;
 using TagTheSpot.Services.User.WebAPI.Middleware;
 using TagTheSpot.Services.User.Infrastructure.Extensions;
+using FluentValidation.AspNetCore;
+using FluentValidation;
+using TagTheSpot.Services.User.Application.Validators;
 
 namespace TagTheSpot.Services.User.WebAPI
 {
@@ -32,6 +35,11 @@ namespace TagTheSpot.Services.User.WebAPI
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
             {
                 options.Tokens.AuthenticatorTokenProvider = "Default";
+                options.Password.RequireDigit = true;
+                options.Password.RequireUppercase = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireNonAlphanumeric = true;
+                options.Password.RequiredLength = 8;
             })
             .AddRoleManager<RoleManager<IdentityRole>>()
             .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -51,6 +59,9 @@ namespace TagTheSpot.Services.User.WebAPI
 
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<ITokenService, JwtTokenService>();
+
+            builder.Services.AddFluentValidationAutoValidation();
+            builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();

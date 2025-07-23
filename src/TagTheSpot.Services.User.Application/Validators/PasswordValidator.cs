@@ -1,0 +1,20 @@
+﻿using FluentValidation;
+using System.Linq.Expressions;
+
+namespace TagTheSpot.Services.User.Application.Validators
+{
+    internal sealed class PasswordValidator<T> : AbstractValidator<T>
+    {
+        public PasswordValidator(Expression<Func<T, string>> passwordSelector)
+        {
+            RuleFor(passwordSelector)
+                .NotEmpty().WithMessage("Password cannot be empty.")
+                .MinimumLength(8).WithMessage("Password must be at least 8 characters long.")
+                .MaximumLength(30).WithMessage("Password must be no more than 30 characters long.")
+                .Matches(@"[A-Z]").WithMessage("Password must contain at least one uppercase letter.")
+                .Matches(@"[a-z]").WithMessage("Password must contain at least one lowercase letter.")
+                .Matches(@"[0-9]").WithMessage("Password must contain at least one number.")
+                .Matches(@"[\W_]").WithMessage("Password must contain at least one special character.");
+        }
+    }
+}
