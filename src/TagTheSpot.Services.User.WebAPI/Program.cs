@@ -5,6 +5,7 @@ using TagTheSpot.Services.User.Application.Identity;
 using TagTheSpot.Services.User.Infrastructure.Persistence;
 using TagTheSpot.Services.User.Infrastructure.Persistence.Options;
 using TagTheSpot.Services.User.WebAPI.Factories;
+using TagTheSpot.Services.User.WebAPI.Middleware;
 
 namespace TagTheSpot.Services.User.WebAPI
 {
@@ -37,6 +38,8 @@ namespace TagTheSpot.Services.User.WebAPI
             builder.Services.AddSwaggerGen();
 
             var app = builder.Build();
+
+            app.UseExceptionHandlingMiddleware();
 
             if (app.Environment.IsDevelopment())
             {
