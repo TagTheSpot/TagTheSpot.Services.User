@@ -15,6 +15,7 @@ using TagTheSpot.Services.User.Infrastructure.Extensions;
 using FluentValidation.AspNetCore;
 using FluentValidation;
 using TagTheSpot.Services.User.Application.Validators;
+using TagTheSpot.Services.User.Application.Options;
 
 namespace TagTheSpot.Services.User.WebAPI
 {
@@ -52,6 +53,11 @@ namespace TagTheSpot.Services.User.WebAPI
 
             builder.Services.AddOptions<DbSettings>()
                 .BindConfiguration(DbSettings.SectionName)
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
+
+            builder.Services.AddOptions<LoginSettings>()
+                .BindConfiguration(LoginSettings.SectionName)
                 .ValidateDataAnnotations()
                 .ValidateOnStart();
 
