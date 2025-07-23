@@ -12,7 +12,7 @@ namespace TagTheSpot.Services.User.Application.Identity
         public static readonly Error EmailAlreadyTaken =
             Error.Validation(
                 code: "User.EmailAlreadyTaken",
-                description: "The same email has already been taken. Please, use a different one.");
+                description: "The same email is already taken. Please, use a different one.");
 
         public static readonly Error InvalidCredentials =
             Error.Validation(
