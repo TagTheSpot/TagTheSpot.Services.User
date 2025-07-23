@@ -16,6 +16,8 @@ using FluentValidation.AspNetCore;
 using FluentValidation;
 using TagTheSpot.Services.User.Application.Validators;
 using TagTheSpot.Services.User.Application.Options;
+using TagTheSpot.Services.User.WebAPI.Options;
+using TagTheSpot.Services.User.WebAPI.Extensions;
 
 namespace TagTheSpot.Services.User.WebAPI
 {
@@ -61,6 +63,11 @@ namespace TagTheSpot.Services.User.WebAPI
                 .ValidateDataAnnotations()
                 .ValidateOnStart();
 
+            builder.Services.AddOptions<SuperUserSettings>()
+                .BindConfiguration(SuperUserSettings.SectionName)
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
+
             builder.Services.AddSingleton<ProblemDetailsFactory>();
 
             builder.Services.AddScoped<IUserService, UserService>();
@@ -89,8 +96,9 @@ namespace TagTheSpot.Services.User.WebAPI
 
             app.UseAuthorization();
 
-
             app.MapControllers();
+
+            app.CreateSuperUserIfNotCreated().Wait();
 
             app.Run();
         }
