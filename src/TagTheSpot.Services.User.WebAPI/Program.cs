@@ -11,6 +11,7 @@ using TagTheSpot.Services.User.Infrastructure.Persistence.Options;
 using TagTheSpot.Services.User.Infrastructure.Services;
 using TagTheSpot.Services.User.WebAPI.Factories;
 using TagTheSpot.Services.User.WebAPI.Middleware;
+using TagTheSpot.Services.User.Infrastructure.Extensions;
 
 namespace TagTheSpot.Services.User.WebAPI
 {
@@ -41,6 +42,11 @@ namespace TagTheSpot.Services.User.WebAPI
                 .ValidateDataAnnotations()
                 .ValidateOnStart();
 
+            builder.Services.AddOptions<DbSettings>()
+                .BindConfiguration(DbSettings.SectionName)
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
+
             builder.Services.AddSingleton<ProblemDetailsFactory>();
 
             builder.Services.AddScoped<IUserService, UserService>();
@@ -59,6 +65,8 @@ namespace TagTheSpot.Services.User.WebAPI
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
+            app.ApplyMigrations();
 
             app.UseHttpsRedirection();
 
