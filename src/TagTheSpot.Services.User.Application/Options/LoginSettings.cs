@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TagTheSpot.Services.User.Application.Options
+﻿namespace TagTheSpot.Services.User.Application.Options
 {
-    internal class LoginSettings
+    public sealed class LoginSettings
     {
+        public const string SectionName = nameof(LoginSettings);
+
+        public bool IsPersistent = true;
+
+        public bool LockoutOnFailure = false;
+
+        public int RefreshTokenExpiryInDays = 7;
     }
 }

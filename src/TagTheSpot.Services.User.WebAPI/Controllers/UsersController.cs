@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using TagTheSpot.Services.User.Application.Abstractions.Services;
 using TagTheSpot.Services.User.Application.DTO;
 using TagTheSpot.Services.User.WebAPI.Factories;
@@ -14,7 +13,7 @@ namespace TagTheSpot.Services.User.WebAPI.Controllers
         private readonly ProblemDetailsFactory _problemDetailsFactory;
 
         public UsersController(
-            IUserService userService, 
+            IUserService userService,
             ProblemDetailsFactory problemDetailsFactory)
         {
             _userService = userService;
@@ -35,6 +34,15 @@ namespace TagTheSpot.Services.User.WebAPI.Controllers
             [FromBody] LoginRequest request)
         {
             var result = await _userService.LoginAsync(request);
+
+            return result.IsSuccess ? Ok(result.Value) : _problemDetailsFactory.GetProblemDetails(result);
+        }
+
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken(
+            [FromBody] RefreshTokenRequest request)
+        {
+            var result = await _userService.RefreshTokenAsync(request);
 
             return result.IsSuccess ? Ok(result.Value) : _problemDetailsFactory.GetProblemDetails(result);
         }
