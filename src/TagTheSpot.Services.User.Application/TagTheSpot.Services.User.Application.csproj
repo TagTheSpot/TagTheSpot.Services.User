@@ -7,11 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.3.1" />
     <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="8.0.18" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\TagTheSpot.Services.User.Domain\TagTheSpot.Services.User.Domain.csproj" />
+    <ProjectReference Include="..\TagTheSpot.Services.User.SharedKernel\TagTheSpot.Services.User.SharedKernel.csproj" />
   </ItemGroup>
 
 </Project>

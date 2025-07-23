@@ -1,11 +1,17 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using TagTheSpot.Services.User.Application.Abstractions.Identity;
+using TagTheSpot.Services.User.Application.Abstractions.Services;
 using TagTheSpot.Services.User.Application.Identity;
+using TagTheSpot.Services.User.Application.Services;
+using TagTheSpot.Services.User.Infrastructure.Authentication.Options;
 using TagTheSpot.Services.User.Infrastructure.Persistence;
 using TagTheSpot.Services.User.Infrastructure.Persistence.Options;
+using TagTheSpot.Services.User.Infrastructure.Services;
 using TagTheSpot.Services.User.WebAPI.Factories;
 using TagTheSpot.Services.User.WebAPI.Middleware;
+using TagTheSpot.Services.User.Infrastructure.Extensions;
 
 namespace TagTheSpot.Services.User.WebAPI
 {
@@ -31,7 +37,20 @@ namespace TagTheSpot.Services.User.WebAPI
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
 
+            builder.Services.AddOptions<JwtSettings>()
+                .BindConfiguration(JwtSettings.SectionName)
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
+
+            builder.Services.AddOptions<DbSettings>()
+                .BindConfiguration(DbSettings.SectionName)
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
+
             builder.Services.AddSingleton<ProblemDetailsFactory>();
+
+            builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<ITokenService, JwtTokenService>();
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
@@ -46,6 +65,8 @@ namespace TagTheSpot.Services.User.WebAPI
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
+            app.ApplyMigrations();
 
             app.UseHttpsRedirection();
 

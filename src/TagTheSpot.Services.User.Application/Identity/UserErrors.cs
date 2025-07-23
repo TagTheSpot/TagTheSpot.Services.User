@@ -1,0 +1,22 @@
+﻿using TagTheSpot.Services.User.SharedKernel.Shared;
+
+namespace TagTheSpot.Services.User.Application.Identity
+{
+    public static class UserErrors
+    {
+        public static readonly Error InvalidAccessToken =
+           Error.Validation(
+               code: "User.InvalidAccessToken",
+               description: "The provided access token is invalid.");
+
+        public static readonly Error EmailAlreadyTaken =
+            Error.Validation(
+                code: "User.EmailAlreadyTaken",
+                description: "The same email has already been taken. Please, use a different one.");
+
+        public static readonly Error InvalidCredentials =
+            Error.Validation(
+                code: "User.InvalidCredentials",
+                description: "The provided credentials are invalid.");
+    }
+}
