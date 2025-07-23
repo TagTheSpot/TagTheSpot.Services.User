@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TagTheSpot.Services.User.Domain\TagTheSpot.Services.User.Domain.csproj" />
+    <ProjectReference Include="..\TagTheSpot.Services.User.SharedKernel\TagTheSpot.Services.User.SharedKernel.csproj" />
   </ItemGroup>
 
 </Project>

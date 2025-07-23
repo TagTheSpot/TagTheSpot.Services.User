@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using TagTheSpot.Services.User.Application.Abstractions.Services;
 using TagTheSpot.Services.User.Application.Identity;
+using TagTheSpot.Services.User.Application.Services;
+using TagTheSpot.Services.User.Infrastructure.Authentication.Options;
 using TagTheSpot.Services.User.Infrastructure.Persistence;
 using TagTheSpot.Services.User.Infrastructure.Persistence.Options;
 using TagTheSpot.Services.User.WebAPI.Factories;
@@ -31,7 +34,14 @@ namespace TagTheSpot.Services.User.WebAPI
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
 
+            builder.Services.AddOptions<JwtSettings>()
+                .BindConfiguration(JwtSettings.SectionName)
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
+
             builder.Services.AddSingleton<ProblemDetailsFactory>();
+
+            builder.Services.AddScoped<IUserService, UserService>();
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();

@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using TagTheSpot.Services.User.Application.DTO;
+using TagTheSpot.Services.User.SharedKernel.Shared;
 
 namespace TagTheSpot.Services.User.Application.Abstractions.Services
 {
-    internal interface IUserService
+    public interface IUserService
     {
+        Task<Result<RegisterResponse>> RegisterAsync(RegisterRequest request);
+
+        Task<Result<LoginResponse>> LoginAsync(LoginRequest request);
     }
 }
