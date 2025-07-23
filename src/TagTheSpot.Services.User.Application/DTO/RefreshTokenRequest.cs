@@ -1,6 +1,5 @@
 ﻿namespace TagTheSpot.Services.User.Application.DTO
 {
-    public sealed record LoginResponse(
-        string AccessToken,
+    public sealed record RefreshTokenRequest(
         string RefreshToken);
 }

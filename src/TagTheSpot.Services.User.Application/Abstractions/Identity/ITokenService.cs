@@ -7,6 +7,8 @@ namespace TagTheSpot.Services.User.Application.Abstractions.Identity
     {
         string GenerateAccessToken(ApplicationUser user);
 
+        string GenerateRefreshToken();
+
         Task<Result> ValidateAccessTokenAsync(
             string token, bool validateLifetime = true);
     }

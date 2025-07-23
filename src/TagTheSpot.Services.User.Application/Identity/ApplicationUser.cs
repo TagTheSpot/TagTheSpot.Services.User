@@ -6,5 +6,9 @@ namespace TagTheSpot.Services.User.Application.Identity
     public sealed class ApplicationUser : IdentityUser
     {
         public Role Role { get; init; } = Role.RegularUser;
+
+        public string? RefreshTokenHash { get; set; }
+
+        public DateTime RefreshTokenExpirationTime { get; set; }
     }
 }
