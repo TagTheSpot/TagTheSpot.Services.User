@@ -1,6 +1,7 @@
-
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using TagTheSpot.Services.User.Application.Identity;
 using TagTheSpot.Services.User.Infrastructure.Persistence;
 using TagTheSpot.Services.User.Infrastructure.Persistence.Options;
 using TagTheSpot.Services.User.WebAPI.Factories;
@@ -20,6 +21,14 @@ namespace TagTheSpot.Services.User.WebAPI
 
                     options.UseNpgsql(dbSettings.ConnectionString);
                 });
+
+            builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+            {
+                options.Tokens.AuthenticatorTokenProvider = "Default";
+            })
+            .AddRoleManager<RoleManager<IdentityRole>>()
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddDefaultTokenProviders();
 
             builder.Services.AddSingleton<ProblemDetailsFactory>();
 

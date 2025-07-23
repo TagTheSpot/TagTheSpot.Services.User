@@ -1,8 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using TagTheSpot.Services.User.Application.Identity;
 
 namespace TagTheSpot.Services.User.Infrastructure.Persistence
 {
-    public sealed class ApplicationDbContext : DbContext
+    public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public ApplicationDbContext(
             DbContextOptions<ApplicationDbContext> options)
