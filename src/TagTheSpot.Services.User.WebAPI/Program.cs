@@ -1,23 +1,27 @@
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using MassTransit;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using TagTheSpot.Services.Shared.Messaging.Events.Users;
+using TagTheSpot.Services.Shared.Messaging.Options;
 using TagTheSpot.Services.User.Application.Abstractions.Identity;
 using TagTheSpot.Services.User.Application.Abstractions.Services;
 using TagTheSpot.Services.User.Application.Identity;
+using TagTheSpot.Services.User.Application.Options;
 using TagTheSpot.Services.User.Application.Services;
+using TagTheSpot.Services.User.Application.Validators;
 using TagTheSpot.Services.User.Infrastructure.Authentication.Options;
+using TagTheSpot.Services.User.Infrastructure.Extensions;
+using TagTheSpot.Services.User.Infrastructure.Options;
 using TagTheSpot.Services.User.Infrastructure.Persistence;
 using TagTheSpot.Services.User.Infrastructure.Persistence.Options;
 using TagTheSpot.Services.User.Infrastructure.Services;
+using TagTheSpot.Services.User.WebAPI.Extensions;
 using TagTheSpot.Services.User.WebAPI.Factories;
 using TagTheSpot.Services.User.WebAPI.Middleware;
-using TagTheSpot.Services.User.Infrastructure.Extensions;
-using FluentValidation.AspNetCore;
-using FluentValidation;
-using TagTheSpot.Services.User.Application.Validators;
-using TagTheSpot.Services.User.Application.Options;
 using TagTheSpot.Services.User.WebAPI.Options;
-using TagTheSpot.Services.User.WebAPI.Extensions;
 
 namespace TagTheSpot.Services.User.WebAPI
 {
@@ -48,6 +52,11 @@ namespace TagTheSpot.Services.User.WebAPI
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
 
+            builder.Services.AddOptions<AzureServiceBusSettings>()
+                .BindConfiguration(AzureServiceBusSettings.SectionName)
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
+
             builder.Services.AddOptions<JwtSettings>()
                 .BindConfiguration(JwtSettings.SectionName)
                 .ValidateDataAnnotations()
@@ -72,6 +81,24 @@ namespace TagTheSpot.Services.User.WebAPI
 
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<ITokenService, JwtTokenService>();
+
+            builder.Services.AddMassTransit(busConfigurator =>
+            {
+                busConfigurator.SetKebabCaseEndpointNameFormatter();
+
+                busConfigurator.UsingAzureServiceBus((context, configurator) =>
+                {
+                    AzureServiceBusSettings settings = context
+                        .GetRequiredService<IOptions<AzureServiceBusSettings>>().Value;
+
+                    configurator.Host(settings.ConnectionString);
+
+                    configurator.Message<UserCreatedEvent>(m =>
+                    {
+                        m.SetEntityName(settings.UserTopicName);
+                    });
+                });
+            });
 
             builder.Services.AddFluentValidationAutoValidation();
             builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
