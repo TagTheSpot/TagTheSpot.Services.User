@@ -4,8 +4,6 @@ using MassTransit;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using TagTheSpot.Services.Shared.Messaging.Events.Users;
-using TagTheSpot.Services.Shared.Messaging.Options;
 using TagTheSpot.Services.User.Application.Abstractions.Identity;
 using TagTheSpot.Services.User.Application.Abstractions.Services;
 using TagTheSpot.Services.User.Application.Identity;
@@ -52,8 +50,8 @@ namespace TagTheSpot.Services.User.WebAPI
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
 
-            builder.Services.AddOptions<AzureServiceBusSettings>()
-                .BindConfiguration(AzureServiceBusSettings.SectionName)
+            builder.Services.AddOptions<RabbitMqSettings>()
+                .BindConfiguration(RabbitMqSettings.SectionName)
                 .ValidateDataAnnotations()
                 .ValidateOnStart();
 
@@ -86,16 +84,15 @@ namespace TagTheSpot.Services.User.WebAPI
             {
                 busConfigurator.SetKebabCaseEndpointNameFormatter();
 
-                busConfigurator.UsingAzureServiceBus((context, configurator) =>
+                busConfigurator.UsingRabbitMq((context, configurator) =>
                 {
-                    AzureServiceBusSettings settings = context
-                        .GetRequiredService<IOptions<AzureServiceBusSettings>>().Value;
+                    RabbitMqSettings settings = context
+                        .GetRequiredService<IOptions<RabbitMqSettings>>().Value;
 
-                    configurator.Host(settings.ConnectionString);
-
-                    configurator.Message<UserCreatedEvent>(m =>
+                    configurator.Host(settings.Host, settings.VirtualHost, h =>
                     {
-                        m.SetEntityName(settings.UserTopicName);
+                        h.Username(settings.Username);
+                        h.Password(settings.Password);
                     });
                 });
             });

@@ -9,6 +9,9 @@ using TagTheSpot.Services.User.Application.Identity;
 using TagTheSpot.Services.User.Application.Options;
 using TagTheSpot.Services.User.SharedKernel.Shared;
 using Microsoft.EntityFrameworkCore;
+using MassTransit;
+using TagTheSpot.Services.Shared.Messaging.Events.Users;
+using Azure.Messaging.ServiceBus;
 
 namespace TagTheSpot.Services.User.Application.Services
 {
@@ -18,17 +21,20 @@ namespace TagTheSpot.Services.User.Application.Services
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ITokenService _tokenService;
         private readonly LoginSettings _loginSettings;
+        private readonly IPublishEndpoint _publishEndpoint;
 
         public UserService(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             ITokenService tokenService,
-            IOptions<LoginSettings> loginSettings)
+            IOptions<LoginSettings> loginSettings,
+            IPublishEndpoint publishEndpoint)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _tokenService = tokenService;
             _loginSettings = loginSettings.Value;
+            _publishEndpoint = publishEndpoint;
         }
 
         public async Task<Result<LoginResponse>> LoginAsync(LoginRequest request)
@@ -142,6 +148,11 @@ namespace TagTheSpot.Services.User.Application.Services
 
                 throw new InvalidOperationException($"Failed to register a user with email: {user.Email}. Error message: {errorMessage}");
             }
+
+            await _publishEndpoint.Publish(new UserCreatedEvent(
+                UserId: Guid.Parse(user.Id),
+                Email: user.Email,
+                Role: user.Role.ToString()));
 
             return Result.Success(
                 new RegisterResponse(
