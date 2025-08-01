@@ -102,7 +102,9 @@ namespace TagTheSpot.Services.User.WebAPI
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.ConfigureSwaggerGen();
+
+            builder.Services.ConfigureAuthentication();
 
             var app = builder.Build();
 
@@ -118,6 +120,7 @@ namespace TagTheSpot.Services.User.WebAPI
 
             app.UseHttpsRedirection();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllers();

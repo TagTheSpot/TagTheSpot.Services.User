@@ -1,17 +1,17 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using MassTransit;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Security.Cryptography;
 using System.Text;
+using TagTheSpot.Services.Shared.Messaging.Events.Users;
 using TagTheSpot.Services.User.Application.Abstractions.Identity;
 using TagTheSpot.Services.User.Application.Abstractions.Services;
 using TagTheSpot.Services.User.Application.DTO;
 using TagTheSpot.Services.User.Application.Identity;
 using TagTheSpot.Services.User.Application.Options;
+using TagTheSpot.Services.User.Domain.Enums;
 using TagTheSpot.Services.User.SharedKernel.Shared;
-using Microsoft.EntityFrameworkCore;
-using MassTransit;
-using TagTheSpot.Services.Shared.Messaging.Events.Users;
-using Azure.Messaging.ServiceBus;
 
 namespace TagTheSpot.Services.User.Application.Services
 {
@@ -126,6 +126,41 @@ namespace TagTheSpot.Services.User.Application.Services
 
         public async Task<Result<RegisterResponse>> RegisterAsync(RegisterRequest request)
         {
+            var result = await RegisterWithRoleAsync(request, role: Role.RegularUser);
+
+            if (result.IsFailure)
+            {
+                return Result.Failure<RegisterResponse>(result.Error);
+            }
+
+            await _publishEndpoint.Publish(new UserCreatedEvent(
+                UserId: Guid.Parse(result.Value.UserId),
+                Email: result.Value.Email,
+                Role: Role.RegularUser.ToString()));
+
+            return Result.Success(result.Value);
+        }
+
+        public async Task<Result<RegisterResponse>> RegisterAdminAsync(RegisterRequest request)
+        {
+            var result = await RegisterWithRoleAsync(request, role: Role.Admin);
+
+            if (result.IsFailure)
+            {
+                return Result.Failure<RegisterResponse>(result.Error);
+            }
+
+            await _publishEndpoint.Publish(new UserCreatedEvent(
+                UserId: Guid.Parse(result.Value.UserId),
+                Email: result.Value.Email,
+                Role: Role.Admin.ToString()));
+
+            return Result.Success(result.Value);
+        }
+
+        private async Task<Result<RegisterResponse>> RegisterWithRoleAsync(
+            RegisterRequest request, Role role)
+        {
             var existingUser = await _userManager.FindByEmailAsync(request.Email);
 
             if (existingUser is not null)
@@ -137,7 +172,8 @@ namespace TagTheSpot.Services.User.Application.Services
             {
                 Id = Guid.NewGuid().ToString(),
                 UserName = request.Email,
-                Email = request.Email
+                Email = request.Email,
+                Role = role
             };
 
             var registerResult = await _userManager.CreateAsync(user, request.Password);
@@ -146,18 +182,12 @@ namespace TagTheSpot.Services.User.Application.Services
             {
                 var errorMessage = string.Join("; ", registerResult.Errors.Select(e => e.Description));
 
-                throw new InvalidOperationException($"Failed to register a user with email: {user.Email}. Error message: {errorMessage}");
+                throw new InvalidOperationException($"Failed to register an admin with email: {user.Email}. Error message: {errorMessage}");
             }
 
-            await _publishEndpoint.Publish(new UserCreatedEvent(
-                UserId: Guid.Parse(user.Id),
-                Email: user.Email,
-                Role: user.Role.ToString()));
-
-            return Result.Success(
-                new RegisterResponse(
-                    UserId: user.Id, 
-                    Email: user.Email));
+            return new RegisterResponse(
+                UserId: user.Id,
+                Email: user.Email);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using TagTheSpot.Services.User.Application.Abstractions.Services;
 using TagTheSpot.Services.User.Application.DTO;
 using TagTheSpot.Services.User.WebAPI.Factories;
@@ -25,6 +26,16 @@ namespace TagTheSpot.Services.User.WebAPI.Controllers
             [FromBody] RegisterRequest request)
         {
             var result = await _userService.RegisterAsync(request);
+
+            return result.IsSuccess ? Ok(result.Value) : _problemDetailsFactory.GetProblemDetails(result);
+        }
+
+        [Authorize(Roles = "Owner")]
+        [HttpPost("register-admin")]
+        public async Task<IActionResult> RegisterAdmin(
+            [FromBody] RegisterRequest request)
+        {
+            var result = await _userService.RegisterAdminAsync(request);
 
             return result.IsSuccess ? Ok(result.Value) : _problemDetailsFactory.GetProblemDetails(result);
         }
