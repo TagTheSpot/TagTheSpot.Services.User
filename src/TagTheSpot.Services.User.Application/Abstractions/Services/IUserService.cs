@@ -7,6 +7,8 @@ namespace TagTheSpot.Services.User.Application.Abstractions.Services
     {
         Task<Result<RegisterResponse>> RegisterAsync(RegisterRequest request);
 
+        Task<Result<RegisterResponse>> RegisterAdminAsync(RegisterRequest request);
+
         Task<Result<LoginResponse>> LoginAsync(LoginRequest request);
 
         Task<Result<LoginResponse>> RefreshTokenAsync(RefreshTokenRequest request);
