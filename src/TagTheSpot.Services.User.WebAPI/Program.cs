@@ -106,19 +106,25 @@ namespace TagTheSpot.Services.User.WebAPI
 
             builder.Services.ConfigureAuthentication();
 
+            builder.Services.AddCorsPolicies();
+
             var app = builder.Build();
 
             app.UseExceptionHandlingMiddleware();
 
             if (app.Environment.IsDevelopment())
             {
-                app.UseSwagger();
-                app.UseSwaggerUI();
+                app.UseCors(CorsExtensions.DevelopmentPolicyName);
+            }
+            else
+            {
+                app.UseHttpsRedirection();
+                app.UseHsts();
             }
 
+            app.UseSwagger();
+            app.UseSwaggerUI();
             app.ApplyMigrations();
-
-            app.UseHttpsRedirection();
 
             app.UseAuthentication();
             app.UseAuthorization();
