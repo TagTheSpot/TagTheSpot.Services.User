@@ -6,7 +6,7 @@ namespace TagTheSpot.Services.User.Application.Validators
     internal sealed class PasswordValidator<T> : AbstractValidator<T>
     {
         public PasswordValidator(Expression<Func<T, string>> passwordSelector)
-        {
+        {   
             RuleFor(passwordSelector)
                 .NotEmpty().WithMessage("Password cannot be empty.")
                 .MinimumLength(8).WithMessage("Password must be at least 8 characters long.")
