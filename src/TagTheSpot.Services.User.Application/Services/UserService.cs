@@ -22,19 +22,22 @@ namespace TagTheSpot.Services.User.Application.Services
         private readonly ITokenService _tokenService;
         private readonly LoginSettings _loginSettings;
         private readonly IPublishEndpoint _publishEndpoint;
+        private readonly IGoogleAuthService _googleAuthService;
 
         public UserService(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             ITokenService tokenService,
             IOptions<LoginSettings> loginSettings,
-            IPublishEndpoint publishEndpoint)
+            IPublishEndpoint publishEndpoint,
+            IGoogleAuthService googleAuthService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _tokenService = tokenService;
             _loginSettings = loginSettings.Value;
             _publishEndpoint = publishEndpoint;
+            _googleAuthService = googleAuthService;
         }
 
         public async Task<Result<LoginResponse>> LoginAsync(LoginRequest request)
@@ -182,12 +185,68 @@ namespace TagTheSpot.Services.User.Application.Services
             {
                 var errorMessage = string.Join("; ", registerResult.Errors.Select(e => e.Description));
 
-                throw new InvalidOperationException($"Failed to register an admin with email: {user.Email}. Error message: {errorMessage}");
+                throw new InvalidOperationException($"Failed to register a user with email: {user.Email}. Error message: {errorMessage}");
             }
 
             return new RegisterResponse(
                 UserId: user.Id,
                 Email: user.Email);
+        }
+
+        public async Task<Result<LoginResponse>> LogInWithGoogleAsync(LogInWithGoogleRequest request)
+        {
+            var result = await _googleAuthService.ValidateAndGetEmailAsync(request.GoogleIdToken);
+
+            if (result.IsFailure)
+            {
+                return Result.Failure<LoginResponse>(result.Error);
+            }
+
+            var email = result.Value;
+
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user is null)
+            {
+                user = new ApplicationUser()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    UserName = email,
+                    Email = email,
+                    Role = Role.RegularUser
+                };
+
+                var registerResult = await _userManager.CreateAsync(user);
+
+                if (!registerResult.Succeeded)
+                {
+                    var errorMessage = string.Join("; ", registerResult.Errors.Select(e => e.Description));
+
+                    throw new InvalidOperationException($"Failed to register a user with email: {user.Email}. Error message: {errorMessage}");
+                }
+            }
+
+            var refreshToken = _tokenService.GenerateRefreshToken();
+            var accessToken = _tokenService.GenerateAccessToken(user);
+
+            user.RefreshTokenHash = HashRefreshToken(refreshToken);
+
+            user.RefreshTokenExpirationTime = DateTime.UtcNow.AddDays(
+                _loginSettings.RefreshTokenExpiryInDays);
+
+            var updateResult = await _userManager.UpdateAsync(user);
+
+            if (!updateResult.Succeeded)
+            {
+                var errors = string.Join("; ", updateResult.Errors);
+
+                throw new InvalidOperationException(
+                    $"Encountered errors during updating a refresh token for user with email: {user.Email}. Errors: {errors}");
+            }
+
+            return new LoginResponse(
+                AccessToken: accessToken, 
+                RefreshToken: refreshToken);
         }
     }
 }
