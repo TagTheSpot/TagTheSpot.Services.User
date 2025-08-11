@@ -75,10 +75,16 @@ namespace TagTheSpot.Services.User.WebAPI
                 .ValidateDataAnnotations()
                 .ValidateOnStart();
 
+            builder.Services.AddOptions<GoogleAuthSettings>()
+                .BindConfiguration(GoogleAuthSettings.SectionName)
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
+
             builder.Services.AddSingleton<ProblemDetailsFactory>();
 
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<ITokenService, JwtTokenService>();
+            builder.Services.AddScoped<IGoogleAuthService, GoogleAuthService>();
 
             builder.Services.AddMassTransit(busConfigurator =>
             {
