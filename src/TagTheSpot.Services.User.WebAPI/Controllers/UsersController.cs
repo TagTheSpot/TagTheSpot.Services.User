@@ -49,6 +49,15 @@ namespace TagTheSpot.Services.User.WebAPI.Controllers
             return result.IsSuccess ? Ok(result.Value) : _problemDetailsFactory.GetProblemDetails(result);
         }
 
+        [HttpPost("google-login")]
+        public async Task<IActionResult> LogInWithGoogle(
+            [FromBody] LogInWithGoogleRequest request)
+        {
+            var result = await _userService.LogInWithGoogleAsync(request);
+
+            return result.IsSuccess ? Ok(result.Value) : _problemDetailsFactory.GetProblemDetails(result);
+        }
+
         [HttpPost("refresh-token")]
         public async Task<IActionResult> RefreshToken(
             [FromBody] RefreshTokenRequest request)
