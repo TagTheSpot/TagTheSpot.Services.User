@@ -28,5 +28,10 @@ namespace TagTheSpot.Services.User.Application.Identity
             Error.Validation(
                 code: "User.RefreshTokenExpired",
                 description: "The provided refresh token has expired.");
+
+        public static readonly Error InvalidGoogleIdToken =
+            Error.Validation(
+                code: "User.InvalidGoogleIdToken",
+                description: "The provided ID token is invalid.");
     }
 }
