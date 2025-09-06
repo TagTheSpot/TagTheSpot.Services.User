@@ -1,12 +1,8 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
 name: Build and deploy ASP.Net Core app to Azure Web App - tagthespot-services-user
 
 on:
-  push:
-    branches:
-      - main
+  release:
+    types: [published]
   workflow_dispatch:
 
 jobs:
@@ -23,12 +19,15 @@ jobs:
         with:
           dotnet-version: '8.x'
 
+      - name: Restore dependencies
+        run: dotnet restore ./src/TagTheSpot.Services.User.sln
+        
       - name: Build with dotnet
-        run: dotnet build --configuration Release
+        run: dotnet build ./src/TagTheSpot.Services.User.sln --configuration Release --no-restore
 
       - name: dotnet publish
-        run: dotnet publish -c Release -o "${{env.DOTNET_ROOT}}/myapp"
-
+        run: dotnet publish ./src/TagTheSpot.Services.User.WebAPI/TagTheSpot.Services.User.WebAPI.csproj -c Release -o "${{env.DOTNET_ROOT}}/myapp"
+        
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
@@ -52,4 +51,5 @@ jobs:
           app-name: 'tagthespot-services-user'
           slot-name: 'Production'
           package: .
+
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_D3FE78B8099B478396D9F865EE3D1791 }}
