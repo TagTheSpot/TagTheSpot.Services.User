@@ -224,6 +224,11 @@ namespace TagTheSpot.Services.User.Application.Services
 
                     throw new InvalidOperationException($"Failed to register a user with email: {user.Email}. Error message: {errorMessage}");
                 }
+
+                await _publishEndpoint.Publish(new UserCreatedEvent(
+                    UserId: Guid.Parse(user.Id),
+                    Email: user.Email,
+                    Role: user.Role.ToString()));
             }
 
             var refreshToken = _tokenService.GenerateRefreshToken();
