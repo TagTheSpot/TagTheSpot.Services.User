@@ -66,5 +66,14 @@ namespace TagTheSpot.Services.User.WebAPI.Controllers
 
             return result.IsSuccess ? Ok(result.Value) : _problemDetailsFactory.GetProblemDetails(result);
         }
+
+        [HttpPost("confirm-email")]
+        public async Task<IActionResult> ConfirmEmail(
+            [FromBody] ConfirmEmailRequest request)
+        {
+            var result = await _userService.ConfirmEmailAsync(request);
+
+            return result.IsSuccess ? NoContent() : _problemDetailsFactory.GetProblemDetails(result);
+        }
     }
 }
