@@ -14,5 +14,7 @@ namespace TagTheSpot.Services.User.Application.Abstractions.Services
         Task<Result<LoginResponse>> RefreshTokenAsync(RefreshTokenRequest request);
 
         Task<Result<LoginResponse>> LogInWithGoogleAsync(LogInWithGoogleRequest request);
+
+        Task<Result> ConfirmEmailAsync(ConfirmEmailRequest request);
     }
 }

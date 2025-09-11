@@ -213,7 +213,8 @@ namespace TagTheSpot.Services.User.Application.Services
                     Id = Guid.NewGuid().ToString(),
                     UserName = email,
                     Email = email,
-                    Role = Role.RegularUser
+                    Role = Role.RegularUser,
+                    EmailConfirmed = true
                 };
 
                 var registerResult = await _userManager.CreateAsync(user);
@@ -252,6 +253,32 @@ namespace TagTheSpot.Services.User.Application.Services
             return new LoginResponse(
                 AccessToken: accessToken, 
                 RefreshToken: refreshToken);
+        }
+
+        public async Task<Result> ConfirmEmailAsync(ConfirmEmailRequest request)
+        {
+            var user = await _userManager.FindByIdAsync(request.UserId.ToString());
+
+            if (user is null)
+            {
+                return Result.Failure(UserErrors.NotFound);
+            }
+
+            if (user.EmailConfirmed)
+            {
+                return Result.Failure(UserErrors.EmailAlreadyConfirmed);
+            }
+
+            var result = await _userManager.ConfirmEmailAsync(
+                user, 
+                token: request.Token);
+
+            if (!result.Succeeded)
+            {
+                return Result.Failure(UserErrors.InvalidEmailConfirmationToken);
+            }
+
+            return Result.Success();
         }
     }
 }
