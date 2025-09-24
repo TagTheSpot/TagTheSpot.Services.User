@@ -80,6 +80,11 @@ namespace TagTheSpot.Services.User.WebAPI
                 .ValidateDataAnnotations()
                 .ValidateOnStart();
 
+            builder.Services.AddOptions<EmailLinkGenerationSettings>()
+                .BindConfiguration(EmailLinkGenerationSettings.SectionName)
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
+
             builder.Services.AddSingleton<ProblemDetailsFactory>();
 
             builder.Services.AddScoped<IUserService, UserService>();

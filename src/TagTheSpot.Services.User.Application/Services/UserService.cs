@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using TagTheSpot.Services.Shared.Messaging.Auth;
@@ -22,6 +23,7 @@ namespace TagTheSpot.Services.User.Application.Services
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ITokenService _tokenService;
         private readonly LoginSettings _loginSettings;
+        private readonly EmailLinkGenerationSettings _emailLinkGenerationSettings;
         private readonly IPublishEndpoint _publishEndpoint;
         private readonly IGoogleAuthService _googleAuthService;
 
@@ -30,6 +32,7 @@ namespace TagTheSpot.Services.User.Application.Services
             SignInManager<ApplicationUser> signInManager,
             ITokenService tokenService,
             IOptions<LoginSettings> loginSettings,
+            IOptions<EmailLinkGenerationSettings> emailLinkGenerationSettings,
             IPublishEndpoint publishEndpoint,
             IGoogleAuthService googleAuthService)
         {
@@ -37,6 +40,7 @@ namespace TagTheSpot.Services.User.Application.Services
             _signInManager = signInManager;
             _tokenService = tokenService;
             _loginSettings = loginSettings.Value;
+            _emailLinkGenerationSettings = emailLinkGenerationSettings.Value;
             _publishEndpoint = publishEndpoint;
             _googleAuthService = googleAuthService;
         }
@@ -143,10 +147,6 @@ namespace TagTheSpot.Services.User.Application.Services
                 Email: result.Value.Email,
                 Role: Role.RegularUser.ToString()));
 
-            await _publishEndpoint.Publish(new SendConfirmationEmailRequestedEvent(
-                Recipient: result.Value.Email,
-                ConfirmationLink: Role.RegularUser.ToString()));
-
             return Result.Success(result.Value);
         }
 
@@ -198,6 +198,18 @@ namespace TagTheSpot.Services.User.Application.Services
                 var errorMessage = string.Join("; ", registerResult.Errors.Select(e => e.Description));
 
                 throw new InvalidOperationException($"Failed to register a user with email: {user.Email}. Error message: {errorMessage}");
+            }
+
+            if (!emailConfirmed)
+            {
+                var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                var encodedToken = WebUtility.UrlEncode(token);
+
+                var confirmationLink = $"{_emailLinkGenerationSettings.ClientConfirmationLink}?userId={user.Id}&token={encodedToken}";
+
+                await _publishEndpoint.Publish(new SendConfirmationEmailRequestedEvent(
+                    Recipient: user.Email,
+                    ConfirmationLink: confirmationLink));
             }
 
             return new RegisterResponse(
