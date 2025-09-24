@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using MassTransit;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
+using TagTheSpot.Services.Shared.Messaging.Users;
 using TagTheSpot.Services.User.Application.Identity;
 using TagTheSpot.Services.User.Domain.Enums;
 using TagTheSpot.Services.User.WebAPI.Options;
@@ -38,6 +40,13 @@ namespace TagTheSpot.Services.User.WebAPI.Extensions
 
                     throw new InvalidOperationException($"Failed to create a super user with email: {superUserSettings.Email}. Error message: {errorMessage}");
                 }
+
+                var publishEndpoint = scope.ServiceProvider.GetRequiredService<IPublishEndpoint>();
+
+                await publishEndpoint.Publish(new UserCreatedEvent(
+                    UserId: Guid.Parse(superUser.Id),
+                    Email: superUser.Email,
+                    Role: superUser.Role.ToString()));
             }
         }
     }
