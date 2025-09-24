@@ -4,7 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Security.Cryptography;
 using System.Text;
-using TagTheSpot.Services.Shared.Messaging.Events.Users;
+using TagTheSpot.Services.Shared.Messaging.Auth;
+using TagTheSpot.Services.Shared.Messaging.Users;
 using TagTheSpot.Services.User.Application.Abstractions.Identity;
 using TagTheSpot.Services.User.Application.Abstractions.Services;
 using TagTheSpot.Services.User.Application.DTO;
@@ -129,7 +130,8 @@ namespace TagTheSpot.Services.User.Application.Services
 
         public async Task<Result<RegisterResponse>> RegisterAsync(RegisterRequest request)
         {
-            var result = await RegisterWithRoleAsync(request, role: Role.RegularUser);
+            var result = await RegisterWithRoleAsync(
+                request, role: Role.RegularUser);
 
             if (result.IsFailure)
             {
@@ -141,12 +143,19 @@ namespace TagTheSpot.Services.User.Application.Services
                 Email: result.Value.Email,
                 Role: Role.RegularUser.ToString()));
 
+            await _publishEndpoint.Publish(new SendConfirmationEmailRequestedEvent(
+                Recipient: result.Value.Email,
+                ConfirmationLink: Role.RegularUser.ToString()));
+
             return Result.Success(result.Value);
         }
 
         public async Task<Result<RegisterResponse>> RegisterAdminAsync(RegisterRequest request)
         {
-            var result = await RegisterWithRoleAsync(request, role: Role.Admin);
+            var result = await RegisterWithRoleAsync(
+                request, 
+                role: Role.Admin,
+                emailConfirmed: true);
 
             if (result.IsFailure)
             {
@@ -162,7 +171,9 @@ namespace TagTheSpot.Services.User.Application.Services
         }
 
         private async Task<Result<RegisterResponse>> RegisterWithRoleAsync(
-            RegisterRequest request, Role role)
+            RegisterRequest request, 
+            Role role,
+            bool emailConfirmed = false)
         {
             var existingUser = await _userManager.FindByEmailAsync(request.Email);
 
@@ -176,7 +187,8 @@ namespace TagTheSpot.Services.User.Application.Services
                 Id = Guid.NewGuid().ToString(),
                 UserName = request.Email,
                 Email = request.Email,
-                Role = role
+                Role = role,
+                EmailConfirmed = emailConfirmed
             };
 
             var registerResult = await _userManager.CreateAsync(user, request.Password);
@@ -251,7 +263,7 @@ namespace TagTheSpot.Services.User.Application.Services
             }
 
             return new LoginResponse(
-                AccessToken: accessToken, 
+                AccessToken: accessToken,
                 RefreshToken: refreshToken);
         }
 
@@ -270,7 +282,7 @@ namespace TagTheSpot.Services.User.Application.Services
             }
 
             var result = await _userManager.ConfirmEmailAsync(
-                user, 
+                user,
                 token: request.Token);
 
             if (!result.Succeeded)
