@@ -205,7 +205,7 @@ namespace TagTheSpot.Services.User.Application.Services
                 var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                 var encodedToken = WebUtility.UrlEncode(token);
 
-                var confirmationLink = $"{_emailLinkGenerationSettings.ClientConfirmationLink}?userId={user.Id}&token={encodedToken}";
+                var confirmationLink = $"{_emailLinkGenerationSettings.ClientEmailConfirmationLink}?userId={user.Id}&token={encodedToken}";
 
                 await _publishEndpoint.Publish(new SendConfirmationEmailRequestedEvent(
                     Recipient: user.Email,
@@ -301,6 +301,34 @@ namespace TagTheSpot.Services.User.Application.Services
             {
                 return Result.Failure(UserErrors.InvalidEmailConfirmationToken);
             }
+
+            return Result.Success();
+        }
+
+        public async Task<Result> SendPasswordResetAsync(SendPasswordResetRequest request)
+        {
+            var user = await _userManager.FindByEmailAsync(request.Email);
+
+            if (user is null)
+            {
+                return Result.Failure<RegisterResponse>(UserErrors.NotFound);
+            }
+
+            if (!user.EmailConfirmed)
+            {
+                return Result.Failure<RegisterResponse>(UserErrors.EmailNotConfirmed);
+            }
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+            var encodedToken = WebUtility.UrlEncode(token);
+            var encodedEmail = WebUtility.UrlEncode(user.Email);
+
+            var link = $"{_emailLinkGenerationSettings.ClientResetPasswordLink}?email={encodedEmail}&token={encodedToken}";
+
+            await _publishEndpoint.Publish(new SendResetPasswordEmailRequestedEvent(
+                Recipient: user.Email!,
+                ResetPasswordLink: link));
 
             return Result.Success();
         }

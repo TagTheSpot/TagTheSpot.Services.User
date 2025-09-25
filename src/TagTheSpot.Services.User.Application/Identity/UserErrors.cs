@@ -44,6 +44,11 @@ namespace TagTheSpot.Services.User.Application.Identity
                 code: "User.EmailAlreadyConfirmed",
                 description: "The email is already confirmed for this user.");
 
+        public static readonly Error EmailNotConfirmed =
+            Error.Validation(
+                code: "User.EmailNotConfirmed",
+                description: "The email is not confirmed for this user.");
+
         public static readonly Error InvalidEmailConfirmationToken =
             Error.Validation(
                 code: "User.InvalidEmailConfirmationToken",

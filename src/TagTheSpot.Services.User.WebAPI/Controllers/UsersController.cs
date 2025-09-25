@@ -75,5 +75,14 @@ namespace TagTheSpot.Services.User.WebAPI.Controllers
 
             return result.IsSuccess ? NoContent() : _problemDetailsFactory.GetProblemDetails(result);
         }
+
+        [HttpPost("request-password-reset")]
+        public async Task<IActionResult> RequestPasswordReset(
+            [FromBody] SendPasswordResetRequest request)
+        {
+            var result = await _userService.SendPasswordResetAsync(request);
+
+            return result.IsSuccess ? NoContent() : _problemDetailsFactory.GetProblemDetails(result);
+        }
     }
 }
