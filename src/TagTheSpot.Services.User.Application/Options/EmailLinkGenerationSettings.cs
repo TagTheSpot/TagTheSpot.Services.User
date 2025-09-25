@@ -8,6 +8,10 @@ namespace TagTheSpot.Services.User.Application.Options
 
         [Required]
         [Url]
-        public required string ClientConfirmationLink { get; init; }
+        public required string ClientEmailConfirmationLink { get; init; }
+
+        [Required]
+        [Url]
+        public required string ClientResetPasswordLink { get; init; }
     }
 }

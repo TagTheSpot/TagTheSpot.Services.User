@@ -16,5 +16,7 @@ namespace TagTheSpot.Services.User.Application.Abstractions.Services
         Task<Result<LoginResponse>> LogInWithGoogleAsync(LogInWithGoogleRequest request);
 
         Task<Result> ConfirmEmailAsync(ConfirmEmailRequest request);
+
+        Task<Result> SendPasswordResetAsync(SendPasswordResetRequest request);
     }
 }
