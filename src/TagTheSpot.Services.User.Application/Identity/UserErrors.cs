@@ -53,5 +53,10 @@ namespace TagTheSpot.Services.User.Application.Identity
             Error.Validation(
                 code: "User.InvalidEmailConfirmationToken",
                 description: "The provided email confirmation token is invalid or expired.");
+
+        public static readonly Error InvalidResetPasswordToken =
+            Error.Validation(
+                code: "User.InvalidResetPasswordToken",
+                description: "The provided password reset token is invalid or expired.");
     }
 }

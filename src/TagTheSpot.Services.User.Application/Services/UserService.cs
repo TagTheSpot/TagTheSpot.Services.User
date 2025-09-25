@@ -311,12 +311,12 @@ namespace TagTheSpot.Services.User.Application.Services
 
             if (user is null)
             {
-                return Result.Failure<RegisterResponse>(UserErrors.NotFound);
+                return Result.Failure(UserErrors.NotFound);
             }
 
             if (!user.EmailConfirmed)
             {
-                return Result.Failure<RegisterResponse>(UserErrors.EmailNotConfirmed);
+                return Result.Failure(UserErrors.EmailNotConfirmed);
             }
 
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
@@ -329,6 +329,33 @@ namespace TagTheSpot.Services.User.Application.Services
             await _publishEndpoint.Publish(new SendResetPasswordEmailRequestedEvent(
                 Recipient: user.Email!,
                 ResetPasswordLink: link));
+
+            return Result.Success();
+        }
+
+        public async Task<Result> ResetPasswordAsync(ResetPasswordRequest request)
+        {
+            var user = await _userManager.FindByEmailAsync(request.Email);
+
+            if (user is null)
+            {
+                return Result.Failure(UserErrors.NotFound);
+            }
+
+            if (!user.EmailConfirmed)
+            {
+                return Result.Failure(UserErrors.EmailNotConfirmed);
+            }
+
+            var result = await _userManager.ResetPasswordAsync(
+                user,
+                token: request.Token,
+                newPassword: request.NewPassword);
+
+            if (!result.Succeeded)
+            {
+                return Result.Failure(UserErrors.InvalidResetPasswordToken);
+            }
 
             return Result.Success();
         }

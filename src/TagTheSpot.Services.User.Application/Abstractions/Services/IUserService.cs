@@ -18,5 +18,7 @@ namespace TagTheSpot.Services.User.Application.Abstractions.Services
         Task<Result> ConfirmEmailAsync(ConfirmEmailRequest request);
 
         Task<Result> SendPasswordResetAsync(SendPasswordResetRequest request);
+
+        Task<Result> ResetPasswordAsync(ResetPasswordRequest request);
     }
 }
