@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TagTheSpot.Services.Shared.API.Factories;
 using TagTheSpot.Services.User.Application.Abstractions.Services;
 using TagTheSpot.Services.User.Application.DTO;
-using TagTheSpot.Services.User.WebAPI.Factories;
 
 namespace TagTheSpot.Services.User.WebAPI.Controllers
 {

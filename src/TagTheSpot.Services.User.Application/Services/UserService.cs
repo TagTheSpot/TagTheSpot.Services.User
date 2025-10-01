@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
+using TagTheSpot.Services.Shared.Essentials.Results;
 using TagTheSpot.Services.Shared.Messaging.Auth;
 using TagTheSpot.Services.Shared.Messaging.Users;
 using TagTheSpot.Services.User.Application.Abstractions.Identity;
@@ -13,7 +14,6 @@ using TagTheSpot.Services.User.Application.DTO;
 using TagTheSpot.Services.User.Application.Identity;
 using TagTheSpot.Services.User.Application.Options;
 using TagTheSpot.Services.User.Domain.Enums;
-using TagTheSpot.Services.User.SharedKernel.Shared;
 
 namespace TagTheSpot.Services.User.Application.Services
 {
@@ -52,6 +52,11 @@ namespace TagTheSpot.Services.User.Application.Services
             if (user is null)
             {
                 return Result.Failure<LoginResponse>(UserErrors.InvalidCredentials);
+            }
+
+            if (!user.EmailConfirmed)
+            {
+                return Result.Failure<LoginResponse>(UserErrors.EmailNotConfirmed);
             }
 
             var loginResult = await _signInManager.CheckPasswordSignInAsync(user, request.Password, false);
@@ -153,7 +158,7 @@ namespace TagTheSpot.Services.User.Application.Services
         public async Task<Result<RegisterResponse>> RegisterAdminAsync(RegisterRequest request)
         {
             var result = await RegisterWithRoleAsync(
-                request, 
+                request,
                 role: Role.Admin,
                 emailConfirmed: true);
 
@@ -171,7 +176,7 @@ namespace TagTheSpot.Services.User.Application.Services
         }
 
         private async Task<Result<RegisterResponse>> RegisterWithRoleAsync(
-            RegisterRequest request, 
+            RegisterRequest request,
             Role role,
             bool emailConfirmed = false)
         {

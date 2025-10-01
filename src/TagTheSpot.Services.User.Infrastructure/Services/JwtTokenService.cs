@@ -4,10 +4,10 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using TagTheSpot.Services.Shared.Auth.Options;
+using TagTheSpot.Services.Shared.Essentials.Results;
 using TagTheSpot.Services.User.Application.Abstractions.Identity;
 using TagTheSpot.Services.User.Application.Identity;
-using TagTheSpot.Services.User.Infrastructure.Authentication.Options;
-using TagTheSpot.Services.User.SharedKernel.Shared;
 
 namespace TagTheSpot.Services.User.Infrastructure.Services
 {

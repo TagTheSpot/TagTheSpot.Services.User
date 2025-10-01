@@ -1,10 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using TagTheSpot.Services.Shared.Abstractions.Options;
 
 namespace TagTheSpot.Services.User.WebAPI.Options
 {
-    public sealed class SuperUserSettings
+    public sealed class SuperUserSettings : IAppOptions
     {
-        public const string SectionName = nameof(SuperUserSettings);
+        public static string SectionName => nameof(SuperUserSettings);
 
         [EmailAddress]
         [Required]
