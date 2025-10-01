@@ -20,17 +20,20 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.9" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.11" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
-    <PackageReference Include="TagTheSpot.Services.Shared.Messaging" Version="1.0.17" />
+    <PackageReference Include="TagTheSpot.Services.Shared.API" Version="1.0.18" />
+    <PackageReference Include="TagTheSpot.Services.Shared.Application" Version="1.0.16" />
+    <PackageReference Include="TagTheSpot.Services.Shared.Auth" Version="1.0.16" />
+    <PackageReference Include="TagTheSpot.Services.Shared.Messaging" Version="1.0.18" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\TagTheSpot.Services.User.Application\TagTheSpot.Services.User.Application.csproj" />
     <ProjectReference Include="..\TagTheSpot.Services.User.Domain\TagTheSpot.Services.User.Domain.csproj" />
     <ProjectReference Include="..\TagTheSpot.Services.User.Infrastructure\TagTheSpot.Services.User.Infrastructure.csproj" />
-    <ProjectReference Include="..\TagTheSpot.Services.User.SharedKernel\TagTheSpot.Services.User.SharedKernel.csproj" />
   </ItemGroup>
 
 </Project>

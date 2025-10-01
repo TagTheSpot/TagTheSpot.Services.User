@@ -1,5 +1,5 @@
-﻿using TagTheSpot.Services.User.Application.DTO;
-using TagTheSpot.Services.User.SharedKernel.Shared;
+﻿using TagTheSpot.Services.Shared.Essentials.Results;
+using TagTheSpot.Services.User.Application.DTO;
 
 namespace TagTheSpot.Services.User.Application.Abstractions.Services
 {

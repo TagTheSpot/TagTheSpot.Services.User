@@ -1,10 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using TagTheSpot.Services.Shared.Abstractions.Options;
 
 namespace TagTheSpot.Services.User.Application.Options
 {
-    public sealed class EmailLinkGenerationSettings
+    public sealed class EmailLinkGenerationSettings : IAppOptions
     {
-        public const string SectionName = nameof(EmailLinkGenerationSettings);
+        public static string SectionName => nameof(EmailLinkGenerationSettings);
 
         [Required]
         [Url]

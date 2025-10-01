@@ -1,8 +1,10 @@
-﻿namespace TagTheSpot.Services.User.Application.Options
+﻿using TagTheSpot.Services.Shared.Abstractions.Options;
+
+namespace TagTheSpot.Services.User.Application.Options
 {
-    public sealed class LoginSettings
+    public sealed class LoginSettings : IAppOptions
     {
-        public const string SectionName = nameof(LoginSettings);
+        public static string SectionName => nameof(LoginSettings);
 
         public bool IsPersistent = true;
 

@@ -1,4 +1,4 @@
-﻿using TagTheSpot.Services.User.SharedKernel.Shared;
+﻿using TagTheSpot.Services.Shared.Essentials.Results;
 
 namespace TagTheSpot.Services.User.Application.Abstractions.Identity
 {

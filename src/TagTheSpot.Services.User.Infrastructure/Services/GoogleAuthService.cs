@@ -1,9 +1,9 @@
 ﻿using Google.Apis.Auth;
 using Microsoft.Extensions.Options;
+using TagTheSpot.Services.Shared.Essentials.Results;
 using TagTheSpot.Services.User.Application.Abstractions.Identity;
 using TagTheSpot.Services.User.Application.Identity;
 using TagTheSpot.Services.User.Infrastructure.Authentication.Options;
-using TagTheSpot.Services.User.SharedKernel.Shared;
 using static Google.Apis.Auth.GoogleJsonWebSignature;
 
 namespace TagTheSpot.Services.User.Infrastructure.Services
